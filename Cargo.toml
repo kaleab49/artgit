@@ -13,3 +13,15 @@ chrono = { version = "0.4", features = ["serde", "clock"] }
 thiserror = "1.0"
 clap = { version = "4.5", features = ["derive"] }
 hex = "0.4"
+
+[features]
+default = []
+tui = ["ratatui", "crossterm"]
+
+[dependencies.ratatui]
+version = "0.29"
+optional = true
+
+[dependencies.crossterm]
+version = "0.28"
+optional = true

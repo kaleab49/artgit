@@ -40,6 +40,8 @@ pub struct Metadata {
     pub version: u32,
     pub head: Option<usize>,
     pub commits: Vec<Commit>,
+    pub branches: std::collections::HashMap<String, usize>,
+    pub current_branch: String,
 }
 
 impl Default for Metadata {
@@ -48,6 +50,8 @@ impl Default for Metadata {
             version: 1,
             head: None,
             commits: Vec::new(),
+            branches: std::collections::HashMap::new(),
+            current_branch: "main".to_string(),
         }
     }
 }
@@ -155,5 +159,9 @@ impl Storage {
         file.read_to_end(&mut buf)?;
         let decompressed = zstd::decode_all(io::Cursor::new(buf))?;
         Ok(decompressed)
+    }
+
+    pub fn metadata_path(&self) -> &Path {
+        &self.metadata_path
     }
 }
