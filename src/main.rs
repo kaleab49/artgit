@@ -3,7 +3,6 @@ mod repo;
 mod ui;
 
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
 
 use crate::repo::Repo;
 use crate::storage::Error;
@@ -32,40 +31,49 @@ enum Commands {
     Log,
 }
 
-fn main() {
+fn run() -> Result<(), Error> {
     let cli = Cli::parse();
 
-    let result: Result<(), Error> = match cli.command {
+    match cli.command {
         Commands::Init => {
-            let cwd = std::env::current_dir().map_err(Error::from)?;
+            let cwd = std::env::current_dir()?;
             let repo = Repo::init(&cwd)?;
-            println!("Initialized empty artgit repository in {}", repo.root().display());
+            println!(
+                "Initialized empty artgit repository in {}",
+                repo.root().display()
+            );
             Ok(())
         }
         Commands::Commit { message } => {
-            let cwd = std::env::current_dir().map_err(Error::from)?;
+            let cwd = std::env::current_dir()?;
             let mut repo = Repo::open(&cwd)?;
             let commit = repo.commit(&message)?;
-            println!("Created commit {} - {}", &commit.id[..7.min(commit.id.len())], commit.message);
+            println!(
+                "Created commit {} - {}",
+                &commit.id[..7.min(commit.id.len())],
+                commit.message
+            );
             Ok(())
         }
         Commands::Status => {
-            let cwd = std::env::current_dir().map_err(Error::from)?;
+            let cwd = std::env::current_dir()?;
             let repo = Repo::open(&cwd)?;
             let status = repo.status()?;
             ui::print_status(&status);
             Ok(())
         }
         Commands::Log => {
-            let cwd = std::env::current_dir().map_err(Error::from)?;
+            let cwd = std::env::current_dir()?;
             let repo = Repo::open(&cwd)?;
             let commits = repo.log();
             ui::print_log(commits);
             Ok(())
         }
-    };
+    }
+}
 
-    if let Err(err) = result {
+fn main() {
+    if let Err(err) = run() {
         eprintln!("Error: {err}");
         std::process::exit(1);
     }
